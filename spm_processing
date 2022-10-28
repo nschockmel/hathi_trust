@@ -1,0 +1,43 @@
+#!bin/bash
+
+# this script is used to create the single part monograph (spm) file for UW's HathiTrust print holdings disclosure.
+# note: unlike the mpm and ser scripts, this script expects files to be exported from alma analytics in a CSV format and not tab-delimted
+#       this is because alma analytics tab-delimited export files are UCS-2 encoded, so it is easiest to export the records as csv files and converts them to 
+#       tab-delimited
+#
+# this script takes a set of csv files and does the following:
+# 1. combines the files into one csv file and removes the header row
+# 2. removes the row count and pid columns from the full file
+# 3. converts the csv file to a tab-delimited format and saves it as a tsv file using HathiTrust naming conventions
+# 4. adds the header row for spms (oclc, local_id)
+# 5. creates a simple .txt report summarising the number of records, etc.
+
+# declare global variables
+date=`date +%Y%m%d`
+type="spm"
+
+# combine the spm sub-files into one csv file and remove headers
+awk 'FNR > 1' *.csv > ${type}_merged_${date}.csv
+
+# remove row number column
+cut -d, -f 2-3 ${type}_merged_${date}.csv > ${type}_merged_${date}_cols.csv
+
+# remove temp file to keep directory clean
+rm ${type}_merged_${date}.csv
+
+# convert csv to tsv
+cat ${type}_merged_${date}_cols.csv | sed 's/,/\t/g' > ${type}_merged_${date}_temp.tsv
+
+# remove temp file to keep directory clean
+rm ${type}_merged_${date}_cols.csv
+
+# add header row with "oclc" "local_id" and save as tsv with HathiTrust's naming conventions
+sed  $'1 i\\\noclc\tlocal_id' ${type}_merged_${date}_temp.tsv > washington_${type}_full_${date}.tsv
+
+# remove temp file to keep directory clean
+rm ${type}_merged_${date}_temp.tsv
+
+# create a report that summarises counts for each sub-file and total records processed
+rec_count=$(wc -l washington_${type}_full_${date}.tsv | cut -d ' ' -f 1)
+
+echo $rec_count $type records were processed and the file washington_${type}_full_${date}.tsv is ready for submission. > report_${date}.txt

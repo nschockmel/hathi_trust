@@ -1,0 +1,28 @@
+#!bin/bash
+
+# this script is used to create the multi part monograph (mpm) file for UW's HathiTrust print holdings disclosure
+# note: unlike the spm_processing script which uses csv files exported from alma analytics, this script expects a tab-delimited 
+#       export from alma analytics (alma analytics tab-delimited export files are UCS-2 encoded, so this script converts the file to UTF-8 tab-delimited output)
+#
+# this script takes a set of UCS-2 encoded tab-delimited files and does the following:
+# 1. converts the UWC-2 "csv" file to a tab-delimited format 
+# 2. removes the pid column and saves it as a tsv file using HathiTrust naming conventions
+# 3. creates a simple .txt report summarising the number of records, etc.
+
+# declare global variables
+date=`date +%Y%m%d`
+type="mpm"
+file_name="HathiTrust_MPMs.csv"
+
+# convert UCS-2 to UTF-8 tsv
+iconv -f UCS-2 -t UTF-8 -c ${file_name} > ${type}_converted.tsv
+
+# remove pid column (this was included to ensure multiple copies are counted but is not included in the submission) & save to HathiTrust's naming conventions
+cut -f 1-3 ${type}_converted.tsv > washington_${type}_full_${date}.tsv
+
+# clean up temp files in directory
+rm ${type}_converted.tsv
+
+# create a report that summarises counts for each sub-file and total records processed
+rec_count=$(wc -l washington_${type}_full_${date}.tsv | cut -d ' ' -f 1)
+echo $rec_count $type records were processed and the file washington_${type}_full_${date}.tsv is ready for submission. > report_${date}.txt

@@ -1,0 +1,21 @@
+#!bin/bash
+
+# this script is used to create the serial (ser) file for UW's HathiTrust print holdings disclosure.
+#
+# it takes a set of csv files and does the following:
+# 1. converts the USC-2 tab-delimited "csv" file to a UTF tsv file and saves it as a tsv file using HathiTrust naming conventions
+# 2. creates a simple .txt report summarising the number of records, etc.
+#
+# note: Alma analytics tab-delimited export files are UCS-2 encoded, so this script converts the file to UTF-8 tab-delimited output
+
+# declare global variables
+date=`date +%Y%m%d`
+type="ser"
+file_name="HathiTrust_Serials.csv"
+
+# convert UCS-2 to UTF-8 tsv
+iconv -f UCS-2 -t UTF-8 -c ${file_name} > washington_${type}_full_${date}.tsv
+
+# create a report that summarises counts for each sub-file and total records processed
+rec_count=$(wc -l washington_${type}_full_${date}.tsv | cut -d ' ' -f 1)
+echo $rec_count $type records were processed and the file washington_${type}_full_${date}.tsv is ready for submission. > report_${date}.txt
