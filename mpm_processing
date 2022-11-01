@@ -5,7 +5,7 @@
 #       export from alma analytics (alma analytics tab-delimited export files are UCS-2 encoded, so this script converts the file to UTF-8 tab-delimited output)
 #
 # this script takes a set of UCS-2 encoded tab-delimited files and does the following:
-# 1. converts the UWC-2 "csv" file to a tab-delimited format 
+# 1. converts the UCS-2 "csv" file to a tab-delimited format 
 # 2. removes the pid column and saves it as a tsv file using HathiTrust naming conventions
 # 3. creates a simple .txt report summarising the number of records, etc.
 
